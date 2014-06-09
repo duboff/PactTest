@@ -4,14 +4,13 @@ require 'voucher'
 class User
   attr_accessor :voucher, :orders
 
-  def initialize(orders = [], voucher = nil)
+  def initialize(voucher = nil)
     @voucher = voucher
-    @orders = [orders]
+    @orders ||= []
   end
 
   def bill
     new_order = Order.new(self)
-
     @orders << new_order
   end
 end
