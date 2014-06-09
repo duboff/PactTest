@@ -9,9 +9,10 @@ class Order
 
   def billed_for
     price = DEFAULT_PRICE
-    # user.orders.each do |order|
-    #   price - order.billed_for
-    # end
-    price
+    if user.voucher
+      price - user.voucher.billed_for(price)
+    else
+      price
+    end
   end
 end
