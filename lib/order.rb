@@ -1,24 +1,39 @@
 class Order
   DEFAULT_PRICE = 6.95
 
-  attr_accessor :user
+  attr_accessor :user, :price
 
   def initialize(user)
     @user = user
+    @price = DEFAULT_PRICE
   end
 
   def billed_for
-    price = DEFAULT_PRICE
-    if user.voucher
-      if user.voucher.instant?
-        user.voucher.credit = price * (user.voucher.number - 1)
-        price = user.voucher.number * (price - user.voucher.billed_for(price))
-        user.voucher.instant = false
-        user.voucher.type = :default
-      else
-        price -= user.voucher.billed_for(price)
-      end
+    if voucher && voucher.instant?
+      instant_bill
+    elsif user.voucher
+      apply_voucher
+    else 
+      price
     end
-    price
   end
+
+  def voucher
+    user.voucher
+  end
+
+  def instant_bill
+    multi_price = voucher.multi_bill(price)
+    reset_voucher
+    multi_price
+  end
+
+  def apply_voucher
+    price - voucher.billed_for(price)
+  end
+
+  def reset_voucher
+    user.voucher = Voucher.create(:default, credit: price * user.voucher.number)
+  end
+
 end
